@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  # Device server
+  device_server:
+    image: node:12.16.2-alpine3.9
+    restart: always
+    container_name: ota-device-server
+    volumes:
+      - ./src/device:/usr/app
+      - ./src/utils:/usr/app/utils
+    working_dir: /usr/app
+    environment:
+      - REDIS_HOST=ota-redis
+      - PORT=3000
+    env_file:
+      - ./deploy/postgresql/pg.env
+      - ./deploy/server/s3.env
+      - ./deploy/server/cloudfront.env
+      - ./deploy/server/version.env
+      - ./deploy/server/mattermost.env
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+
+  # Dev server
+  dev_server:
+    image: node:12.16.2-alpine3.9
+    restart: always
+    container_name: ota-dev-server
+    volumes:
+      - ./src/dev:/usr/app
+      - ./src/utils:/usr/app/utils
+    working_dir: /usr/app
+    environment:
+      - REDIS_HOST=ota-redis
+      - PORT=3000
+    env_file:
+      - ./deploy/postgresql/pg.env
+      - ./deploy/server/s3.env
+      - ./deploy/server/cloudfront.env
+      - ./deploy/server/version.env
+      - ./deploy/server/mattermost.env
+    ports:
+      - "3001:3000"
+    networks:
+      - backend
+
+  redis:
+    image: redis:alpine
+    restart: always
+    container_name: ota-redis
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  device_server:
+    command: sh -c "npm install && npm i -g pm2 && pm2-runtime ./bin/service"
+  dev_server:
+    command: sh -c "npm install && npm i -g pm2 && pm2-runtime ./bin/service"
+  redis:
+    image: redis:alpine
+    container_name: ota-redis
+    volumes:
+      - /data/ota/redis:/data

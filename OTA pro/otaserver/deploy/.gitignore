@@ -1,0 +1,4 @@
+postgresql/data
+postgresql/*.env
+server/*.env
+redis/data

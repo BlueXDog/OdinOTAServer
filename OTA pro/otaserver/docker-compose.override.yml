@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  device_server:
+    command: sh -c "npm install && npm i -g pm2 && pm2-runtime --watch ./bin/service"
+    environment:
+      - POSTGRES_HOST=ota-postgres
+  dev_server:
+    command: sh -c "npm install && npm i -g pm2 && pm2-runtime --watch ./bin/service"
+    environment:
+      - POSTGRES_HOST=ota-postgres
+
+  # Database
+  postgres:
+    image: postgres:alpine
+    restart: always
+    container_name: ota-postgres
+    env_file:
+      - ./deploy/postgresql/pg.env
+    networks:
+      - backend
+    volumes:
+      - ./deploy/postgresql/data:/var/lib/postgresql/data:Z
+      - ./deploy/postgresql/scripts/CreateTable.sql:/docker-entrypoint-initdb.d/CreateTable.sql
+      - ./deploy/postgresql/scripts/mockdata.sql:/docker-entrypoint-initdb.d/mockdata.sql
+    ports:
+      - "15432:5432"
+  redis:
+    image: redis:alpine
+    container_name: ota-redis
+    volumes:
+      - ./deploy/redis/data:/data

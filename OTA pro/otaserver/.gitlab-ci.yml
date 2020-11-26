@@ -1,0 +1,78 @@
+stages:
+  - dep
+  - lint
+  - deploy
+
+cache:
+  paths:
+    - src/dev/node_modules/
+    - src/device/node_modules/
+
+install_dependencies:
+  image: node:12.16.2-alpine3.9
+  stage: dep
+  script:
+    - cd src/dev && npm i && cd ../..
+    - cd src/device && npm i && cd ../..
+  only:
+    changes:
+      - src/**/*
+dep:
+  image: alpine
+  stage: dep
+  script:
+    - echo dep
+
+eslint:
+  image: node:12.16.2-alpine3.9
+  stage: lint
+  script:
+    - cd src/dev && npm i eslint && node_modules/eslint/bin/eslint.js --ignore-path .gitignore . && cd ../..
+    - cd src/device && npm i eslint && node_modules/eslint/bin/eslint.js --ignore-path .gitignore . && cd ../..
+  only:
+    changes:
+      - src/**/*
+lint:
+  image: alpine
+  stage: lint
+  script:
+    - echo lint
+
+deploy_stage:
+  image: alpine
+  stage: deploy
+  before_script:
+    - "which ssh-agent || ( apk update && apk add openssh-client )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_STAGE" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - echo "$CI_COMMIT_TAG"
+    - ssh -o SendEnv=LC_S3_ENV_STAGE $SSH_USERNAME_STAGE@$SSH_HOST_STAGE "cd xphone-ota-server && git checkout -f stage && git pull && ./deploy/run_stage.sh"
+  when: manual
+  only:
+    refs:
+      - tags
+    variables:
+      - $CI_COMMIT_TAG =~ /-beta$/
+
+deploy_production:
+  image: alpine
+  stage: deploy
+  before_script:
+    - "which ssh-agent || ( apk update && apk add openssh-client )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_PROD" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh -o SendEnv=LC_S3_ENV_PROD $SSH_USERNAME_PROD@$SSH_HOST_PROD "cd xphone-ota-server && git checkout -f master && git pull && ./deploy/run_prod.sh"
+  when: manual
+  only:
+    refs:
+      - tags
+    variables:
+      - $CI_COMMIT_TAG =~ /-release$/

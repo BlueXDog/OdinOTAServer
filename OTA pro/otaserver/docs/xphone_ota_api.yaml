@@ -1,0 +1,343 @@
+openapi: 3.0.0
+info:
+  description: This is a simple API for Update OTA Project
+  version: "1.0.0"
+  title: Simple Update OTA API
+  contact:
+    email: ngocviettien@ginno.com
+tags:
+  - name: XPhone
+    description: Request from XPhone
+  - name: Dev
+    description: Request from developer
+paths:
+  /device/update/info:
+    get:
+      tags:
+        - XPhone
+      summary: Client register
+      operationId: getUpdateInfo
+      description: |
+        Client can register as a user with phone number
+      parameters:
+        - in: query
+          name: IMEI
+          description: XPhone's IMEI
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: requestID
+          description: request id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: signKey
+          description: request sign key
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: OSVersion
+          description: OS version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: SBLVersion
+          description: OS version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: STMVersion
+          description: STM version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: dataVersion
+          description: user data version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: textVersion
+          description: text version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: HWVersion
+          description: hardware version
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: register success
+        "401":
+          description: Authentication is failed
+  /device/update/noti:
+    get:
+      tags:
+        - XPhone
+      summary: XPhone noti update success or fail
+      operationId: notiUpdateInfo
+      description: |
+        XPhone noti update success or fail
+      parameters:
+        - in: query
+          name: IMEI
+          description: XPhone's IMEI
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: requestID
+          description: request id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: signKey
+          description: request sign key
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: OSVersion
+          description: OS version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: SBLVersion
+          description: OS version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: STMVersion
+          description: STM version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: dataVersion
+          description: user data version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: textVersion
+          description: text version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: HWVersion
+          description: hardware version
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Authentication is failed
+        "501":
+          description: Fail
+  /dev/device:
+    post:
+      tags:
+        - Dev
+      summary: Developer want to create new XPhone info
+      operationId: createXphoneInfo
+      description: |
+        Developer want to create new XPhone info
+      parameters:
+        - in: query
+          name: user
+          description: dev user
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: requestID
+          description: request id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: signKey
+          description: request sign key
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: IMEI
+          description: XPhone's IMEI
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: key
+          description: key for auth request
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: production
+          description: production id of phone
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: OSVersion
+          description: OS version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: SBLVersion
+          description: OS version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: STMVersion
+          description: STM version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: dataVersion
+          description: user data version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: textVersion
+          description: text version
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: HWVersion
+          description: hardware version
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Authentication is failed
+        "501":
+          description: Fail
+  /dev/upload:
+    post:
+      tags:
+        - Dev
+      summary: Upload new firmware version
+      operationId: uploadFirmware
+      description: |
+        Developer want to upload new firmware version
+      parameters:
+        - in: query
+          name: user
+          description: dev user
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: requestID
+          description: request id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: signKey
+          description: request sign key
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: production
+          description: production of firmware
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                firmware:
+                  type: object
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Authentication is failed
+        "501":
+          description: Fail
+  /dev/production/list:
+    get:
+      tags:
+        - Dev
+      summary: Get information of all productions
+      operationId: getProductionList
+      description: |
+        Developer want to get information of all productions
+      parameters:
+        - in: query
+          name: user
+          description: dev user
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: requestID
+          description: request id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: signKey
+          description: request sign key
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductionItem"
+        "401":
+          description: Authentication is failed
+        "501":
+          description: Fail
+components:
+  schemas:
+    ProductionItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          example: XPhone
+        hw_version:
+          type: string
+          example: "1.0"
+        region:
+          type: string
+          example: "vn"
