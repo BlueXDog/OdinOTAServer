@@ -1,0 +1,28 @@
+version: "3"
+services:
+    ota-server:
+        image: odin-ota-server_ota-server
+        ports: 
+            - "3000:3000"
+        volumes: 
+            - ./text.log:/serverOTA/text.log
+  
+    # Database
+    postgres:
+      image: postgres:alpine
+      restart: always
+      container_name: ota-postgres
+      env_file:
+        - ./models/pg.env
+      volumes:
+        - ./deploy/postgresql/data:/var/lib/postgresql/data:Z
+        - ./models/CreateTable.sql:/docker-entrypoint-initdb.d/CreateTable.sql
+        - ./models/MockData.sql:/docker-entrypoint-initdb.d/mockdata.sql
+      ports:
+        - "15432:5432"
+    redis:
+      image: redis:alpine
+      container_name: ota-redis
+      volumes:
+        - ./deploy/redis/data:/data
+  
