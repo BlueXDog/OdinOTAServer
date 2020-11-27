@@ -12,8 +12,9 @@ var db *sql.DB
 //VersionInfo define struct version
 type VersionInfo struct {
 	Production string
+	ProductionID int
 	Region string
-	OSVersion string
+	OSLastestVersion string
 	UpdatePermission int  
 }
 func init(){
@@ -36,16 +37,14 @@ func init(){
 
 //GetUpdateVersion used to get update version 
 func GetUpdateVersion(IMEI string) (VersionInfo,error) {
-	rows, err := db.Query(`SELECT productions.name as production, regions.name as region,
-	os.version as os, 
+	rows, err := db.Query(`SELECT productions.name as production,productions.id as productionid, regions.name as region,
+	productions.os_latest_version as latest_version, 
 	odins.update_permission as permission 
 	FROM public.odin_devices as odins 
 	JOIN public.odin_productions as productions 
 	ON odins.production_id=productions.id 
 	JOIN public.odin_regions as regions 
-	ON productions.region_id=regions.id 
-	JOIN public.odin_versions as os 
-	ON productions.os_version_id=os.id   
+	ON productions.region_id=regions.id  
 	WHERE odins.imei=$1`,IMEI)
 	if err != nil {
 		log.Error(err)
@@ -53,17 +52,18 @@ func GetUpdateVersion(IMEI string) (VersionInfo,error) {
 	defer rows.Close()
 	var (
 		production string
+		productionid int 
 		region string
 		osVersion string
 		updatePermission int  
 	)
 	if rows.Next() {
-		if err := rows.Scan(&production,&region,&osVersion,&updatePermission); err != nil {
+		if err := rows.Scan(&production,&productionid,&region,&osVersion,&updatePermission); err != nil {
 			log.Error(err)
 			return VersionInfo{}, err
 		}
 	}
-	version := VersionInfo{production,region,osVersion,updatePermission}
+	version := VersionInfo{production,productionid,region,osVersion,updatePermission}
 	return version,nil
 }
 //UpdateDeviceChecking used to update data to server
@@ -100,13 +100,13 @@ func GetUserKey( imei string) (string ,error) {
 	return userkey,nil
 }
 //GetOSURL get the url of the osversion in database
-func GetOSURL(OSversion string) (string , error){
-	rows, err := db.Query("SELECT url FROM public.odin_versions where version = $1 ",OSversion)
+func GetOSURL(versioninfoID int) (string , error){
+	var URL string 
+	rows, err := db.Query("SELECT url FROM odin_versions WHERE odin_versions.id = $1",versioninfoID)
 	if err != nil {
 		log.Error(err)
 	}
 	defer rows.Close()
-	var URL string
 	if rows.Next() {
 		if err := rows.Scan(&URL); err != nil {
 			log.Error(err)
@@ -115,4 +115,9 @@ func GetOSURL(OSversion string) (string , error){
 	}
 	return URL,nil
 }
-
+// GetVersionArray get list of all current OS version on a production
+func GetVersionArray(ProductionID int) []int {
+	var OSVersionArray []int
+	var osVersion 
+	rows, err
+}

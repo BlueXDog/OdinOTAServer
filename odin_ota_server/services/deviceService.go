@@ -73,6 +73,7 @@ func GetUpdateInfo(response http.ResponseWriter, request *http.Request){
 	if version.UpdatePermission != 1 {
 		response.WriteHeader(http.StatusForbidden)
 	}
+	// check and return newer version 
 	err = checkAndReturnNewVersion(version,middlewares.Autheninfo.OSVersion,response)
 	if err != nil {
 		log.Error(err)
@@ -80,12 +81,14 @@ func GetUpdateInfo(response http.ResponseWriter, request *http.Request){
 	}
 }
 
-func getlink (production string, osversion string) string {
+func getlink (ProductionID int ,OSCurrentVersion string) string {
 	keyID, err := helpers.ConfigGet("cdn","keypairID")
 	if err != nil {
 		log.Error(err)
 	}
-	OSURL ,err := dataprovider.GetOSURL(osversion)
+	//newer osversion id 
+	nextOSVersionID := getNextOSVersionID(ProductionID,OSCurrentVersion)
+	OSURL ,err := dataprovider.GetOSURL(nextOSVersionID)
 	privKey := createPrivateKey()
 	signer := sign.NewURLSigner(keyID,privKey)
     signedURL, err := signer.Sign(OSURL, time.Now().Add(1*time.Hour))
@@ -95,11 +98,18 @@ func getlink (production string, osversion string) string {
 	return signedURL
 }
 
+func getNextOSVersionID(ProductionID int,OSCurrentVersion string) int {
+	var OSVersionID int
+	OSVersionArray := dataprovider.GetVersionArray(ProductionID)
+	
+	return OSVersionID
+}
 func checkAndReturnNewVersion( version dataprovider.VersionInfo , OSVersion string , response http.ResponseWriter) error {
 	// check if have a newer version 
-	if version.OSVersion != OSVersion {
-		//return link to new OSVersion
-		signedURL := getlink(version.Production,version.OSVersion)
+	if version.OSLastestVersion != OSVersion {
+		//return the newer OSversion
+		
+		signedURL := getlink(version.ProductionID,OSVersion)
 		response.Header().Set("Content-Type", "application/json")
 		responseLink := LinkResponse{Update: "yes",
 					Os:signedURL}

@@ -8,16 +8,7 @@ CREATE TABLE IF NOT EXISTS odin_devs
   last_login_time TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS odin_versions 
-(
-  id             serial    PRIMARY KEY,
-  type           text      NOT NULL,
-  version        text      NOT NULL UNIQUE,
-  url            text      NOT NULL,
-  release_time   TIMESTAMP NOT NULL,
-  release_dev_id int       NOT NULL REFERENCES odin_devs(id),
-  CONSTRAINT type_version UNIQUE (type, version)
-);
+
 
 CREATE TABLE IF NOT EXISTS odin_regions
 (
@@ -33,9 +24,20 @@ CREATE TABLE IF NOT EXISTS odin_regions
   region_id       int    NOT NULL REFERENCES odin_regions(id),
   hw_version      text   NOT NULL,
   firmware_key    text   NOT NULL,
-  os_version_id   int    REFERENCES odin_versions(id),
+  os_latest_version text   NOT NULL, 
   os_history      text[],
   CONSTRAINT device_type UNIQUE (name, region_id, hw_version)
+);
+CREATE TABLE IF NOT EXISTS odin_versions 
+(
+  id             serial    PRIMARY KEY,
+  production_id  int       NOT NULL REFERENCES odin_productions(id),
+  type           text      NOT NULL,
+  version        text      NOT NULL,
+  url            text      NOT NULL,
+  release_time   TIMESTAMP NOT NULL,
+  release_dev_id int       NOT NULL REFERENCES odin_devs(id),
+  CONSTRAINT type_version UNIQUE (type, version)
 );
 
 CREATE TABLE IF NOT EXISTS odin_devices

@@ -54,7 +54,7 @@ func CheckRequestSignKey(SignKey string) (bool, error) {
 	if len(data) < 2 {
 		return false, nil
 	}
-	return true, nil
+	return true, nil // change to false for checking data
 }
 
 //AddRequestSignKey add signkey to redis
